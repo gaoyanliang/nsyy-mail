@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.base import MIMEBase
 from email import encoders
+import datetime
 
 # ===========================================================
 # ===============        config       =======================
@@ -29,6 +30,10 @@ smtp_server = "192.168.124.128"
 smtp_port = 587
 smtp_username = 'postmaster@nsyy.com'
 smtp_password = '111111'
+
+# IMAP server settings
+imap_server = "192.168.124.128"
+imap_port = 993
 
 # db config
 db_host = '192.168.124.128'
@@ -64,10 +69,10 @@ def send_mail():
     msg["To"] = ", ".join(recipient_emails)
     msg["Cc"] = ", ".join(cc_emails)
     msg["Bcc"] = ", ".join(bcc_emails)
-    msg["Subject"] = "Test send email with python code!"
+    msg["Subject"] = "测试发送邮件" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Add the email body
-    body = "Hello, this is the email body."
+    body = "Hello, this is the email body. 这是邮件内容"
     msg.attach(MIMEText(body, "plain"))
 
     # Attach an image
@@ -75,6 +80,7 @@ def send_mail():
     with open(image_path, "rb") as image_file:
         image = MIMEImage(image_file.read())
         image.add_header("Content-ID", "<image1>")
+        image.add_header('Content-Disposition', 'attachment', filename=image_path)
         msg.attach(image)
 
     # Attach a file
@@ -83,21 +89,43 @@ def send_mail():
     part = MIMEBase("application", "octet-stream")
     part.set_payload(attachment.read())
     encoders.encode_base64(part)
-    part.add_header("Content-Disposition", f"attachment; yym-iredmail-install.md")
+    part.add_header("Content-Disposition", f"attachment; filename=iredmail_install.md")
     msg.attach(part)
 
-    # Connect to the SMTP server
-    server = smtplib.SMTP(smtp_server, smtp_port)
-    server.starttls()
-    server.login(smtp_username, smtp_password)
+    try:
+        # Connect to the SMTP server
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_username, smtp_password)
 
-    # Send the email
-    email_text = msg.as_string()
-    server.sendmail(sender_email, recipient_emails + cc_emails + bcc_emails, email_text)
+        # Send the email
+        email_text = msg.as_string()
+        server.sendmail(sender_email, recipient_emails + cc_emails + bcc_emails, email_text)
 
-    # Close the SMTP server connection
-    server.quit()
-    print('Debugging: email sended!')
+        # Close the SMTP server connection
+        server.quit()
+
+        print("Email sent successfully")
+    except smtplib.SMTPException as e:
+        print(f"Failed to send the email: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    # Save the just-sent email to the Sent folder
+    # Connect to the IMAP server
+    mail = imaplib.IMAP4_SSL(imap_server, imap_port)
+    mail.login(smtp_username, smtp_password)
+
+    # Select the "Sent" mailbox
+    mailbox = "Sent"  # You may need to adjust this based on your server's folder naming
+    mail.select(mailbox)
+
+    # Append the sent email to the "Sent" folder
+    email_bytes = email_text.encode('utf-8')
+    mail.append(mailbox, None, None, email_bytes)
+
+    # Close the IMAP server connection
+    mail.logout()
 
 
 """通过邮件 id 精确读取邮件"""
