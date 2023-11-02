@@ -1,4 +1,5 @@
 import pymysql
+from pymysql.cursors import DictCursor
 
 """
 数据库工具类
@@ -23,7 +24,8 @@ class DbUtil:
         self.password = password
         self.database = database
         self.__conn = pymysql.connect(host=host, port=port, user=user, password=password, database=database)
-        self.__cursor = self.__conn.cursor()
+        # Create a cursor with DictCursor
+        self.__cursor = self.__conn.cursor(cursor=DictCursor)
         print(f'Debugging: connect db: {host=}, {port=}, {user=}, {password=}, {database=}')
 
     def __del__(self):
@@ -98,11 +100,6 @@ class DbUtil:
         WHERE 
             table_schema = %s AND table_name = %s;
         """ % (db, table)
-        self.__cursor.execute(sql, args)
-        return self.__cursor.fetchall()
-
-    def execute(self, sql, args=None):
-        """获取SQL执行结果"""
         self.__cursor.execute(sql, args)
         return self.__cursor.fetchall()
 

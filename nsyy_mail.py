@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.base import MIMEBase
 from email import encoders
+from subprocess import Popen, PIPE
 import datetime
 
 # ===========================================================
@@ -47,7 +48,6 @@ ssh_host = "192.168.124.128"
 ssh_username = "root"
 ssh_password = "111111"
 
-
 # ===========================================================
 # ===============         mail        =======================
 # ===========================================================
@@ -59,7 +59,7 @@ ssh_password = "111111"
 def send_mail():
     # Sender and recipient email addresses
     sender_email = "postmaster@nsyy.com"
-    recipient_emails = ["test1@nsyy.com", "test2@nsyy.com", "test3@nsyy.com", "test4@nsyy.com"]
+    recipient_emails = ["list@nsyy.com", "yanliang@nsyy.com"]
     cc_emails = ["a1@nsyy.com", "a2@nsyy.com", "a3@nsyy.com", "a4@nsyy.com"]
     bcc_emails = ["yanliang@nsyy.com"]
 
@@ -69,7 +69,10 @@ def send_mail():
     msg["To"] = ", ".join(recipient_emails)
     msg["Cc"] = ", ".join(cc_emails)
     msg["Bcc"] = ", ".join(bcc_emails)
-    msg["Subject"] = "测试发送邮件" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    msg["Subject"] = "测试邮件列表功能 by python" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Set the "Disposition-Notification-To" header  已读回执
+    msg["Disposition-Notification-To"] = sender_email
 
     # Add the email body
     body = "Hello, this is the email body. 这是邮件内容"
@@ -80,7 +83,7 @@ def send_mail():
     with open(image_path, "rb") as image_file:
         image = MIMEImage(image_file.read())
         image.add_header("Content-ID", "<image1>")
-        image.add_header('Content-Disposition', 'attachment', filename=image_path)
+        image.add_header('Content-Disposition', 'attachment', filename='test.png')
         msg.attach(image)
 
     # Attach a file
@@ -338,5 +341,163 @@ def create_multiple_mail_user(mail_name_list: list):
     ssh.execute_shell_command("mysql -uroot -p111111 vmail -e 'source /tmp/create_multiple_mail_user.sql'")
     ssh.execute_shell_command("rm /tmp/create_multiple_mail_user.sql")
     del ssh
+
+
+"""修改密码"""
+
+
+def update_mail_user_password(mail_name: str, new_password: str):
+    db = DbUtil(db_host, db_port, db_user, db_passwd, db_database)
+
+    # 判断该username是否已经存在
+    sql = f"select username from mailbox where username='{mail_name}'"
+    user = db.query_one(sql)
+    if user is None:
+        print(f'Error: 邮箱 {mail_name} 不存在，不能执行更新密码操作')
+        return
+
+    encrypted_password = generate_encrypted_password(new_password)
+    sql = f"UPDATE mailbox SET password='{encrypted_password}' WHERE username='{mail_name}';"
+    db.execute(sql)
+    db.commit()
+
+    del db
+
+
+DEFAULT_PASSWORD_SCHEME = 'SSHA512'
+HASHES_WITHOUT_PREFIXED_PASSWORD_SCHEME = ['NTLM']
+
+"""加密密码"""
+
+
+def generate_encrypted_password(plain_password, scheme=None):
+    # TODO scheme 可选值： SSHA512 BCRYPT， 默认使用 ssha512
+    ssh = SshUtil(ssh_host, ssh_username, ssh_password)
+    output = ssh.execute_shell_command(f"cd /home/yanliang; doveadm pw -s 'ssha512' -p '{plain_password}'")
+    del ssh
+    print(f"generate_encrypted_password plain_password: {plain_password}, encrypted_password: {output}")
+    return output
+
+
+# ===========================================================
+# ===============  mail list manager  =======================
+# ===========================================================
+
+
+"""查询目前创建了哪些 mail list"""
+
+
+def get_mail_lists() -> object:
+    db = DbUtil(db_host, db_port, db_user, db_passwd, db_database)
+
+    # 判断该username是否已经存在
+    sql = "select id, address, domain, created, modified, expired, active from maillists"
+    mail_lists = db.query_all(sql)
+    print(mail_lists)
+    del db
+    return mail_lists
+
+
+"""Show all subscribers"""
+
+
+def get_mail_list_all_subscribers(mail_list_name: str) -> object:
+    ssh = SshUtil(ssh_host, ssh_username, ssh_password)
+    output = ssh.execute_shell_command(f"python3 /opt/mlmmjadmin/tools/maillist_admin.py subscribers {mail_list_name}")
+    del ssh
+
+    if output is not None:
+        output = str(output).replace(",", "")
+        # output = output.replace("(normal)", "")
+        # output = output.replace("(digest)", "")
+        # output = output.replace("(nomail)", "")
+        output = output.splitlines()
+
+    return output
+
+
+"""Create a new mailing list account."""
+
+
+def create_new_mail_list_account(mail_list_name: str) -> object:
+    ssh = SshUtil(ssh_host, ssh_username, ssh_password)
+    output = ssh.execute_shell_command(
+        f"python3 /opt/mlmmjadmin/tools/maillist_admin.py create {mail_list_name} only_subscriber_can_post=no")
+    del ssh
+    return output
+
+
+"""Get settings of an existing mailing list account"""
+
+
+def get_mail_list_settings(mail_list_name: str) -> object:
+    ssh = SshUtil(ssh_host, ssh_username, ssh_password)
+    output = ssh.execute_shell_command(
+        f"python3 /opt/mlmmjadmin/tools/maillist_admin.py info {mail_list_name}")
+    del ssh
+    return output
+
+
+"""Delete an existing mailing list account"""
+
+
+def delete_mail_list(mail_list_name: str) -> object:
+    ssh = SshUtil(ssh_host, ssh_username, ssh_password)
+    output = ssh.execute_shell_command(
+        f"python3 /opt/mlmmjadmin/tools/maillist_admin.py delete {mail_list_name} archive=yes")
+    del ssh
+    return output
+
+
+"""Check whether mailing list has given subscriber."""
+
+
+def check_whether_mail_list_has_subscriber(mail_list_name: str, subscriber: str) -> object:
+    ssh = SshUtil(ssh_host, ssh_username, ssh_password)
+    output = ssh.execute_shell_command(
+        f"python3 /opt/mlmmjadmin/tools/maillist_admin.py has_subscriber {mail_list_name} {subscriber}")
+    del ssh
+    return output
+
+
+"""Show all subscribed lists of a given subscriber."""
+
+
+def show_all_subscribed_of_subscriber(subscriber: str) -> object:
+    ssh = SshUtil(ssh_host, ssh_username, ssh_password)
+    output = ssh.execute_shell_command(
+        f"python3 /opt/mlmmjadmin/tools/maillist_admin.py subscribed {subscriber}")
+    del ssh
+
+    if output is not None:
+        output = str(output).replace(",", "")
+        output = output.replace("'", "")
+        output = output.splitlines()
+
+    return output
+
+
+"""Add new subscribers to mailing list."""
+
+
+def add_subscribers_to_mail_list(mail_list_name: str, subscribers: str) -> object:
+    ssh = SshUtil(ssh_host, ssh_username, ssh_password)
+    output = ssh.execute_shell_command(
+        f"python3 /opt/mlmmjadmin/tools/maillist_admin.py add_subscribers {mail_list_name} {subscribers}")
+    del ssh
+
+    return output
+
+
+"""Remove existing subscribers from mailing list."""
+
+
+def remove_subscribers_from_mail_list(mail_list_name: str, subscribers: str) -> object:
+    ssh = SshUtil(ssh_host, ssh_username, ssh_password)
+    output = ssh.execute_shell_command(
+        f"python3 /opt/mlmmjadmin/tools/maillist_admin.py remove_subscribers {mail_list_name} {subscribers}")
+    del ssh
+
+    return output
 
 

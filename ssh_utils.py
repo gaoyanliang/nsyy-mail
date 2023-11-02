@@ -35,7 +35,8 @@ class SshUtil:
         print("Debugging: Close the SSH connection!")
 
     """Execute a shell command"""
-    def execute_shell_command(self, command, sudo=False):
+    def execute_shell_command(self, command, sudo=False) -> object:
+        output = ""
         try:
             feed_password = False
             if sudo and self.ssh_username != "root":
@@ -62,6 +63,8 @@ class SshUtil:
             #         'retval': stdout.channel.recv_exit_status()}
         except Exception as e:
             print(f"Error executing command: {str(e)}")
+
+        return output
 
 
 # SSH connection details
