@@ -1,4 +1,8 @@
 import paramiko
+from unified_logger import UnifiedLogger
+
+
+log = UnifiedLogger()
 
 
 class SshUtil:
@@ -18,13 +22,13 @@ class SshUtil:
         try:
             self.client.connect(ssh_host, username=ssh_username, password=ssh_password, timeout=self.TIMEOUT)
         except paramiko.AuthenticationException:
-            print("Authentication failed. Please check your credentials.")
+            log.debug("Authentication failed. Please check your credentials.")
             exit(1)
         except paramiko.SSHException as e:
-            print(f"Unable to establish SSH connection: {str(e)}")
+            log.debug(f"Unable to establish SSH connection: {str(e)}")
             exit(1)
         except Exception as e:
-            print(f"Error: {str(e)}")
+            log.debug(f"Error: {str(e)}")
             exit(1)
 
     """Close the SSH connection"""
@@ -32,7 +36,7 @@ class SshUtil:
         if self.client is not None:
             self.client.close()
             self.client = None
-        print("Debugging: Close the SSH connection!")
+        log.debug("Close the SSH connection!")
 
     """Execute a shell command"""
     def execute_shell_command(self, command, sudo=False) -> object:
@@ -48,21 +52,21 @@ class SshUtil:
                 stdin.write(self.ssh_password + "\n")
                 stdin.flush()
 
-            print(f'Debugging: execute command: {command=}')
+            log.debug(f'Debugging: execute command: {command=}')
             # Read and print the output
             output = stdout.read().decode('utf-8')
-            print(f'Debugging: output: {output=}')
+            log.debug(f'Debugging: output: {output=}')
 
             # Read and print any errors
             errors = stderr.read().decode('utf-8')
             if errors:
-                print(f'Debugging: errors: {errors=}')
+                log.debug(f'Debugging: errors: {errors=}')
 
             # return {'out': stdout.readlines(),
             #         'err': stderr.readlines(),
             #         'retval': stdout.channel.recv_exit_status()}
         except Exception as e:
-            print(f"Error executing command: {str(e)}")
+            log.debug(f"Error executing command: {str(e)}")
 
         return output
 

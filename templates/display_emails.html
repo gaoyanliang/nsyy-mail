@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Display</title>
+</head>
+<body>
+    <h1>Emails</h1>
+    <ul>
+        {% for email in email_data %}
+            <li>
+                <strong>{{ email.Subject }}</strong>
+                <strong>{{ email.id }}</strong>
+                <strong>{{ email.Unread }}</strong>
+                <p>{{ email.From }}</p>
+                <p>{{ email.To }}</p>
+                <p>{{ email.CC }}</p>
+                <p>{{ email.Bcc }}</p>
+                <p>{{ email.ReplyToList }}</p>
+                <p>{{ email.Date }}</p>
+                <p>{{ email.ContactGroups }}</p>
+                <p>{{ email.attachments }}</p>
+                <p>{{ email.body }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

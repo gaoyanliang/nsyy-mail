@@ -1,15 +1,18 @@
 import pymysql
 from pymysql.cursors import DictCursor
+from unified_logger import UnifiedLogger
 
 """
 数据库工具类
 """
 
+log = UnifiedLogger()
+
 
 class DbUtil:
     """构造函数"""
 
-    def __init__(self, host: str, port: int, user: str, password: str, database: str = None):
+    def __init__(self, host: str, user: str, password: str, database: str, port: int = 3306):
         """
         mysql 连接配置
         :param host:
@@ -26,13 +29,13 @@ class DbUtil:
         self.__conn = pymysql.connect(host=host, port=port, user=user, password=password, database=database)
         # Create a cursor with DictCursor
         self.__cursor = self.__conn.cursor(cursor=DictCursor)
-        print(f'Debugging: connect db: {host=}, {port=}, {user=}, {password=}, {database=}')
+        log.debug(f'connect db: {host=}, {port=}, {user=}, {password=}, {database=}')
 
     def __del__(self):
         """析构函数"""
         self.__cursor.close()
         self.__conn.close()
-        print("Debugging: close db!")
+        log.debug("close db!")
 
     def get_conn(self):
         """获取连接"""
@@ -42,28 +45,23 @@ class DbUtil:
         """获取游标"""
         return self.__conn.cursor(cursor)
 
-    def commit(self):
+    def __commit(self):
         """提交改动"""
-        return self.__conn.commit()
+        self.__conn.commit()
 
     def get_version(self, args=None):
         """获取 DB 版本"""
         self.__cursor.execute("SELECT VERSION()", args)
         version = self.__cursor.fetchone()
-        print(f'Debugging: DB Version : {version=}')
+        log.debug(f'DB Version : {version=}')
         return version
-
-    def select_db(self, db):
-        """选择数据库"""
-        self.__conn.select_db(db)
-        print(f'Debugging: switch database to {db=}')
 
     def list_databases(self, args=None):
         """查询所有数据库"""
         self.__cursor.execute("SHOW DATABASES", args)
         dbs = []
         for db in self.__cursor.fetchall():
-            dbs.append(db[0])
+            dbs.append(db)
         return dbs
 
     def list_tables(self, args=None):
@@ -71,13 +69,8 @@ class DbUtil:
         self.__cursor.execute("SHOW TABLES", args)
         tables = []
         for table in self.__cursor.fetchall():
-            tables.append(table[0])
+            tables.append(table)
         return tables
-
-    def execute(self, sql, args=None):
-        """获取SQL执行结果"""
-        self.__cursor.execute(sql, args)
-        return self.__cursor.fetchall()
 
     def get_table_fields(self, db, table, args=None):
         """获取表字段信息"""
@@ -85,7 +78,7 @@ class DbUtil:
         self.__cursor.execute(sql, args)
         fields = []
         for field in self.__cursor.fetchall():
-            fields.append(field[0])
+            fields.append(field)
         return fields
 
     def table_metadata(self, db, table, args=None):
@@ -101,6 +94,19 @@ class DbUtil:
             table_schema = %s AND table_name = %s;
         """ % (db, table)
         self.__cursor.execute(sql, args)
+        return self.__cursor.fetchall()
+
+    def select_db(self, db):
+        """选择数据库"""
+        self.__conn.select_db(db)
+        log.debug(f'switch database to {db=}')
+
+    def execute(self, sql, args=None, need_commit: bool = False):
+        """获取SQL执行结果"""
+        self.__cursor.execute(sql, args)
+        if need_commit:
+            self.__commit()
+
         return self.__cursor.fetchall()
 
     def query_one(self, sql):
@@ -134,52 +140,46 @@ table = 'user'
 
 
 if __name__ == "__main__":
-    db = DbUtil(host, port, user, password, database)
+    db = DbUtil(host, user, password, database)
     db.get_version()
 
     dbs = db.list_databases()
-    print("database list: ", dbs)
+    log.info(f"database list: {dbs}")
 
     dbs = db.list_tables()
-    print("table list: ", dbs)
+    log.info(f"table list: {dbs}")
 
-    print("test1.", table, "fields: ")
+    log.info(f"test1: {table}")
     table_metadata = db.get_table_fields("test1", table)
     for metadata in table_metadata:
-        print(metadata)
-    print()
+        log.info(f"fields: {metadata}")
 
-    print("test1.", table, "metadata: ")
+    log.info(f"test1: {table}")
     table_metadata = db.table_metadata("test1", table)
     for metadata in table_metadata:
-        print(metadata)
-    print()
+        log.info(f"metadata: {metadata}")
 
     db.select_db("test2")
 
     dbs = db.list_tables()
-    print("table list: ", dbs)
+    log.info(f"table list: {dbs}")
 
-    print("test2.", table, "fields: ")
+    log.info(f"test2: {table}")
     table_metadata = db.get_table_fields("test2", table)
     for metadata in table_metadata:
-        print(metadata)
-    print()
+        log.info(f"fields: {metadata}")
 
-    print("test2.", table, "metadata: ")
+    log.info(f"test2: {table}")
     table_metadata = db.table_metadata("test2", table)
     for metadata in table_metadata:
-        print(metadata)
-    print()
+        log.info(f"fields: {metadata}")
 
     insert_sql = "INSERT INTO user (name, age) VALUES (%s, %s)"
     val = ("user1", "21")
-    db.execute(insert_sql, val)
-    db.get_conn().commit()
+    db.execute(insert_sql, val, need_commit=True)
 
     val = ("user2", "22")
-    db.execute(insert_sql, val)
-    db.get_conn().commit()
+    db.execute(insert_sql, val, need_commit=True)
 
     del db
 

@@ -1,0 +1,75 @@
+2023-11-04 09:12:23,936 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:12:23,936 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:12:23,936 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:12:23,937 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:12:23,937 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:12:23,937 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:12:23,937 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:12:23,937 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:12:23,937 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:12:23,937 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:15:35,292 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:15:35,292 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:15:35,292 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:15:35,292 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:15:35,292 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:15:35,292 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:15:35,292 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:15:35,292 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:15:35,292 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:15:35,292 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:15:46,963 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:15:46,963 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:15:46,963 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:15:46,963 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:15:46,963 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:15:46,963 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:15:46,963 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:15:46,963 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:15:46,963 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:15:46,963 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:16:05,183 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:16:05,183 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:16:05,183 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:16:05,183 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:16:05,183 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:16:05,183 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:16:05,183 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:16:05,183 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:16:05,183 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:16:05,183 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:19:59,452 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:19:59,453 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:19:59,453 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:19:59,453 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:19:59,453 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:19:59,453 - nsyy_mail - DEBUG - This is a debug message.
+2023-11-04 09:19:59,453 - nsyy_mail - INFO - This is an info message.
+2023-11-04 09:19:59,453 - nsyy_mail - WARNING - This is a warning message.
+2023-11-04 09:19:59,453 - nsyy_mail - ERROR - This is an error message.
+2023-11-04 09:19:59,453 - nsyy_mail - CRITICAL - This is a critical message.
+2023-11-04 09:30:32,633 - nsyy_mail - DEBUG - Debugging: connect db: host='127.0.0.1', port=3306, user='root', password='gyl.2015', database='test1'
+2023-11-04 09:30:32,633 - nsyy_mail - DEBUG - DB Version : version={'VERSION()': '8.0.33'}
+2023-11-04 09:37:11,505 - nsyy_mail - DEBUG - connect db: host='127.0.0.1', port=3306, user='root', password='gyl.2015', database='test1'
+2023-11-04 09:37:11,505 - nsyy_mail - DEBUG - DB Version : version={'VERSION()': '8.0.33'}
+2023-11-04 09:37:11,507 - nsyy_mail - INFO - database list: [{'Database': 'gva'}, {'Database': 'information_schema'}, {'Database': 'mail'}, {'Database': 'mysql'}, {'Database': 'performance_schema'}, {'Database': 'sys'}, {'Database': 'test1'}, {'Database': 'test2'}]
+2023-11-04 09:37:11,508 - nsyy_mail - INFO - table list: [{'Tables_in_test1': 'user'}]
+2023-11-04 09:37:11,508 - nsyy_mail - INFO - test1: user
+2023-11-04 09:37:11,509 - nsyy_mail - INFO - fields: {'COLUMN_NAME': 'age'}
+2023-11-04 09:37:11,509 - nsyy_mail - INFO - fields: {'COLUMN_NAME': 'id'}
+2023-11-04 09:37:11,509 - nsyy_mail - INFO - fields: {'COLUMN_NAME': 'name'}
+2023-11-04 09:37:11,509 - nsyy_mail - INFO - test1: user
+2023-11-04 09:37:11,510 - nsyy_mail - INFO - metadata: {'COLUMN_NAME': 'age', 'COLUMN_TYPE': 'varchar(255)', 'ORDINAL_POSITION': 3, 'COLUMN_COMMENT': '', 'COLUMN_DEFAULT': None}
+2023-11-04 09:37:11,510 - nsyy_mail - INFO - metadata: {'COLUMN_NAME': 'id', 'COLUMN_TYPE': 'int', 'ORDINAL_POSITION': 1, 'COLUMN_COMMENT': '', 'COLUMN_DEFAULT': None}
+2023-11-04 09:37:11,510 - nsyy_mail - INFO - metadata: {'COLUMN_NAME': 'name', 'COLUMN_TYPE': 'varchar(255)', 'ORDINAL_POSITION': 2, 'COLUMN_COMMENT': '', 'COLUMN_DEFAULT': None}
+2023-11-04 09:37:11,510 - nsyy_mail - DEBUG - switch database to db='test2'
+2023-11-04 09:37:11,511 - nsyy_mail - INFO - table list: [{'Tables_in_test2': 'user'}]
+2023-11-04 09:37:11,511 - nsyy_mail - INFO - test2: user
+2023-11-04 09:37:11,512 - nsyy_mail - INFO - fields: {'COLUMN_NAME': 'age'}
+2023-11-04 09:37:11,512 - nsyy_mail - INFO - fields: {'COLUMN_NAME': 'id'}
+2023-11-04 09:37:11,512 - nsyy_mail - INFO - fields: {'COLUMN_NAME': 'name'}
+2023-11-04 09:37:11,512 - nsyy_mail - INFO - test2: user
+2023-11-04 09:37:11,513 - nsyy_mail - INFO - fields: {'COLUMN_NAME': 'age', 'COLUMN_TYPE': 'varchar(255)', 'ORDINAL_POSITION': 3, 'COLUMN_COMMENT': '', 'COLUMN_DEFAULT': None}
+2023-11-04 09:37:11,513 - nsyy_mail - INFO - fields: {'COLUMN_NAME': 'id', 'COLUMN_TYPE': 'int', 'ORDINAL_POSITION': 1, 'COLUMN_COMMENT': '', 'COLUMN_DEFAULT': None}
+2023-11-04 09:37:11,513 - nsyy_mail - INFO - fields: {'COLUMN_NAME': 'name', 'COLUMN_TYPE': 'varchar(255)', 'ORDINAL_POSITION': 2, 'COLUMN_COMMENT': '', 'COLUMN_DEFAULT': None}
+2023-11-04 09:37:11,516 - nsyy_mail - DEBUG - close db!

@@ -1,5 +1,6 @@
-from flask import Flask, jsonify, request, json
-import nsyy_mail
+from flask import Flask, jsonify, request, json, render_template, redirect, url_for, send_file
+from mail_service import fetch_attachment
+import mail_service
 
 app = Flask(__name__)
 
@@ -8,26 +9,22 @@ app = Flask(__name__)
 # ===========================================================
 
 
-"""根据邮件id读取邮件"""
+"""发送邮件"""
 
 
-@app.route('/send_mail', methods=['GET'])
-def send_mail():
-    nsyy_mail.send_mail()
+@app.route('/send_email', methods=['POST'])
+def send_email():
+    from_email = request.form['from']
+    recipient = request.form['recipient']
+    cc = request.form['cc']
+    bcc = request.form['bcc']
+    subject = request.form['subject']
+    message = request.form['message']
+    attachment = request.files['attachment']
 
-    return "<p>Hello, World!</p>"
+    mail_service.send_email(from_email, recipient, cc, bcc, subject,  message, attachment)
 
-
-"""根据邮件id读取邮件"""
-
-
-@app.route('/read_mail', methods=['GET'])
-def read_mail():
-    email_id = request.args.get("email_id")
-    if request.method == 'GET':
-        nsyy_mail.read_mail(email_id)
-
-    return "<p>Hello, World!</p>"
+    return redirect(url_for('index'))
 
 
 """读取邮件列表"""
@@ -35,11 +32,36 @@ def read_mail():
 
 @app.route('/read_mail_list', methods=['GET'])
 def fetch_mail_list():
+    pers_id = request.args.get("pers_id")
+    email_account = request.args.get("email_account")
+    page_size = request.args.get("page_size")
+    page_number = request.args.get("page_number")
+    email_list = []
     if request.method == 'GET':
-        nsyy_mail.read_mail_list()
+        email_list = mail_service.read_mail_list(int(pers_id), email_account, int(page_size), int(page_number))
+    return render_template('display_emails.html', email_data=email_list)
 
-    return "<p>Hello, World!</p>"
 
+@app.route('/download_attachment', methods=['GET'])
+def download_attachment():
+    attachment_name = request.args.get("attachment_name")
+    pers_id = request.args.get("pers_id")
+    email_account = request.args.get("email_account")
+    email_id = request.args.get("email_id")
+
+    attachments = list(fetch_attachment(int(pers_id), email_account, email_id))
+
+    for attachment in attachments:
+        if attachment_name.__contains__(attachment[0]):
+            # Save the attachment to a file
+            with open(attachment[0], 'wb') as file:
+                file.write(attachment[1])
+
+            return "Attachment saved as: " + attachment[0]
+            # data_stream = BytesIO(attachment[1])
+            # return send_file(data_stream, as_attachment=True, download_name=attachment[0])
+
+    return "Attachment not found", 404
 
 # ===========================================================
 # ===============  mail user manager  =======================
@@ -56,7 +78,7 @@ def fetch_mail_list():
 def create_a_new_mail_user():
     data = request.json
     print(data)
-    nsyy_mail.create_a_new_mail_user(data.get('username'), data.get('password'))
+    mail_service.create_a_new_mail_user(data.get('username'), data.get('password'))
     return "<p>Hello, World!</p>"
 
 
@@ -70,7 +92,7 @@ def create_a_new_mail_user():
 def create_multiple_mail_user():
     data = request.json
     print(data)
-    nsyy_mail.create_multiple_mail_user(data.get('mail_name_list'))
+    mail_service.create_multiple_mail_user(data.get('mail_name_list'))
     return "<p>Hello, World!</p>"
 
 
@@ -83,119 +105,22 @@ def create_multiple_mail_user():
 def update_mail_user_password():
     data = request.json
     print(data)
-    nsyy_mail.update_mail_user_password(data.get('mail_user'), data.get('new_password'))
+    mail_service.update_mail_user_password(data.get('mail_user'), data.get('new_password'))
     return f"update mail user {data.get('mail_user')} password successful."
 
 
 # ===========================================================
-# ===============  mail list manager  =======================
+# =============== contact group manager =====================
 # ===========================================================
 
-"""查询目前创建了哪些 mail list"""
-
-
-@app.route("/mail_lists", methods=['GET'])
-def query_mail_lists():
-    mail_lists = nsyy_mail.get_mail_lists()
-    return jsonify(mail_lists)
-
-
-"""查询 mail list 有哪些订阅者"""
-
-
-@app.route("/mail_list_all_subscribers", methods=['GET'])
-def query_mail_list_all_subscribers():
-    mail_list_name = request.args.get("mail_list_name")
-    subscribers = nsyy_mail.get_mail_list_all_subscribers(mail_list_name)
-    return subscribers
-
-
-"""Create a new mailing list account"""
-
-
-@app.route("/create_new_mail_list_account", methods=['POST'])
-def create_new_mail_list_account():
-    data = request.json
-    print(data)
-    subscribers = nsyy_mail.create_new_mail_list_account(data.get('mail_list_name'))
-    return subscribers
-
-
-"""Get settings of an existing mailing list account"""
-
-
-@app.route("/query_mail_list_settings", methods=['GET'])
-def query_mail_list_settings():
-    mail_list_name = request.args.get("mail_list_name")
-    output = nsyy_mail.get_mail_list_settings(mail_list_name)
-    return output
-
-
-"""Delete an existing mailing list account"""
-
-
-@app.route("/delete_mail_list", methods=['POST'])
-def delete_mail_list():
-    data = request.json
-    print(data)
-    mail_list_name = data.get("mail_list_name")
-    output = nsyy_mail.delete_mail_list(mail_list_name)
-    return output
-
-
-"""Check whether mailing list has given subscriber."""
-
-
-@app.route("/check_has_subscriber", methods=['GET'])
-def check_whether_mail_list_has_subscriber():
-    mail_list_name = request.args.get("mail_list_name")
-    subscriber = request.args.get("subscriber")
-    output = nsyy_mail.check_whether_mail_list_has_subscriber(mail_list_name, subscriber)
-    return output
-
-
-"""Show all subscribed lists of a given subscriber."""
-
-
-@app.route("/show_all_subscribed", methods=['GET'])
-def show_all_subscribed_of_subscriber():
-    subscriber = request.args.get("subscriber")
-    output = nsyy_mail.show_all_subscribed_of_subscriber(subscriber)
-    return output
-
-
-"""Add new subscribers to mailing list."""
-
-
-@app.route("/add_subscribers", methods=['POST'])
-def add_subscribers_to_mail_list():
-    data = request.json
-    print(data)
-    mail_list_name = data.get("mail_list_name")
-    subscribers = data.get("subscribers")
-    output = nsyy_mail.add_subscribers_to_mail_list(mail_list_name, subscribers)
-    return output
-
-
-"""Remove existing subscribers from mailing list."""
-
-
-@app.route("/remove_subscribers", methods=['POST'])
-def remove_subscribers_from_mail_list():
-    data = request.json
-    print(data)
-    mail_list_name = data.get("mail_list_name")
-    subscribers = data.get("subscribers")
-    output = nsyy_mail.remove_subscribers_from_mail_list(mail_list_name, subscribers)
-    return output
-
+# 。。。。。。
 
 """测试接口"""
 
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+@app.route('/')
+def index():
+    return render_template('email_from.html')
 
 
 @app.route('/returnjson', methods=['GET'])

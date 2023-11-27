@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+    <title>Send Email with Attachment</title>
+</head>
+<body>
+    <h1>Send Email with Attachment</h1>
+    <form method="POST" action="/send_email" enctype="multipart/form-data">
+        <label for="from">From:        </label>
+        <input type="email" name="from" required><br><br>
+
+        <label for="recipient">Recipient:   </label>
+        <input type="email" name="recipient" required><br><br>
+
+        <label for="cc">抄送:          </label>
+        <input type="email" name="cc" required><br><br>
+
+        <label for="bcc">密送:          </label>
+        <input type="email" name="bcc" required><br><br>
+
+        <label for="subject">Subject:     </label>
+        <input type="text" name="subject" required><br><br>
+
+        <label for="message">Message:     </label>
+        <textarea name="message" required></textarea><br><br>
+
+        <label for="attachment">Attachment:  </label>
+        <input type="file" name="attachment" multiple><br><br>
+
+        <button type="submit">Send Email</button><br><br>
+
+        <a href="http://127.0.0.1:5000/download_attachment?attachment_name=iredmail_install.md&pers_id=1&email_account=test@nsyy.com&email_id=5" download="iredmail_install.md">点击下载</a>
+    </form>
+
+</body>
+</html>
